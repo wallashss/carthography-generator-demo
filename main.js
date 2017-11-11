@@ -41,13 +41,86 @@ function init()
     {
         updateParameters();
         update();
-        // setImageFromCanvas(canvasController.canvas, map);
+    });
+
+    let randomizeAllButton = document.getElementById("randomize-all-button");
+    randomizeAllButton.addEventListener("click", ()=>
+    {
+        randomizeAll();
+        updateParameters();
+        update();
+    });
+
+    let randomizeNoiseButton = document.getElementById("randomize-noise-button");
+    randomizeNoiseButton.addEventListener("click", ()=>
+    {
+        randomizeNoise();
+        updateParameters();
+        update();
+    });
+
+    let randomizeThresholdsButton = document.getElementById("randomize-thresholds-button");
+    randomizeThresholdsButton.addEventListener("click", ()=>
+    {
+        randomizeThresholds();
+        updateParameters();
+        update();
+    });
+
+    let randomizeColorsButton = document.getElementById("randomize-colors-button");
+    randomizeColorsButton.addEventListener("click", ()=>
+    {
+        randomizeColors();
+        updateParameters();
+        update();
     });
 }
 
 function setImageFromCanvas(canvas, image)
 {
     image.src = canvas.toDataURL();
+}
+
+function random (min, max)
+{
+    return min + (max-min) * Math.random();
+}
+
+function randomizeNoise()
+{
+    document.getElementById("persistence-input").value = random(0.4, 0.6) ;
+    document.getElementById("offsetx-input").value = random(0, 200);
+    document.getElementById("offsety-input").value = random(0, 200);
+    document.getElementById("scalex-input").value = random(0.01, 0.1);
+    document.getElementById("scaley-input").value = random(0.01, 0.1);
+}
+function randomizeThresholds()
+{
+    let firstThreshold = random(0.1, 0.4);
+    let diff = random(0.01, 0.2);
+    document.getElementById("second-threshold").value = firstThreshold;
+    document.getElementById("third-threshold").value = firstThreshold + diff;
+}
+
+function randomizeColors()
+{
+    let getRandomColor = () =>
+    {
+        let hsb = {h: Math.random(), s: 0.8, b: 0.8, a: 1.0};
+        let rgb = Hsb2Rgb(hsb); 
+        return  rgbToHex(rgb.r, rgb.g, rgb.b);
+    }
+    
+    document.getElementById("first-color").value = getRandomColor();
+    document.getElementById("second-color").value= getRandomColor();
+    document.getElementById("third-color").value = getRandomColor();
+}
+
+function randomizeAll()
+{
+    randomizeNoise();
+    randomizeThresholds();
+    randomizeColors();    
 }
 
 function updateParameters()
@@ -89,9 +162,7 @@ function updateParameters()
 
     let threshold1 = document.getElementById("second-threshold").value;
     let threshold2 = document.getElementById("third-threshold").value;
-    thresholds = [threshold1, threshold2]
-
-    console.log(colors);
+    thresholds = [threshold1, threshold2];
 
     octaves = newOctaves;
 }
@@ -132,9 +203,6 @@ function update()
     noiseContext.putImageData(noiseImage,0,0);
 
     // World
-
-
-   console.log(thresholds);
     let mapImage = mapContext.createImageData(w, h);
     worldGenerator.generateToTexture(noiseData, thresholds, colors, mapImage, w, h);
     mapContext.putImageData(mapImage, 0, 0);
